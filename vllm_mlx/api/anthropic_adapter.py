@@ -249,6 +249,9 @@ def _convert_message(msg: AnthropicMessage) -> list[Message]:
             )
 
         elif block.type == "tool_result":
+            # Follow-up (out of scope for the image-block fix): images nested
+            # inside tool_result.content still go through this text-only
+            # extraction and are not converted to image_url parts.
             # Tool result → OpenAI tool message
             result_content = block.content
             if isinstance(result_content, list):
@@ -275,10 +278,13 @@ def _convert_message(msg: AnthropicMessage) -> list[Message]:
     if msg.role == "assistant":
         combined_text = "\n".join(text_parts) if text_parts else None
         if tool_calls_for_assistant:
+            # An assistant turn can carry an image alongside a tool call; the
+            # media extraction downstream is role-agnostic, so preserve the
+            # full part list rather than flattening to text and dropping it.
             messages.append(
                 Message(
                     role="assistant",
-                    content=combined_text or "",
+                    content=content_parts if has_media else (combined_text or ""),
                     tool_calls=tool_calls_for_assistant,
                 )
             )

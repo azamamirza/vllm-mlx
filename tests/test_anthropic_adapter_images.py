@@ -121,3 +121,32 @@ def test_image_alongside_tool_result_keeps_both():
     assert "user" in roles and "tool" in roles
     user_msg = next(m for m in out if m.role == "user")
     assert parts_of(user_msg)[0]["type"] == "image_url"
+
+
+def test_assistant_image_with_tool_use_preserves_both():
+    msg = AnthropicMessage(
+        role="assistant",
+        content=[
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": "image/png",
+                    "data": PNG,
+                },
+            },
+            {
+                "type": "tool_use",
+                "id": "toolu_1",
+                "name": "zoom",
+                "input": {"region": "top-left"},
+            },
+        ],
+    )
+    (converted,) = _convert_message(msg)
+    assert converted.role == "assistant"
+    assert (
+        converted.tool_calls and converted.tool_calls[0]["function"]["name"] == "zoom"
+    )
+    kinds = [part["type"] for part in parts_of(converted)]
+    assert "image_url" in kinds
