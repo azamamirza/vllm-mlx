@@ -6002,13 +6002,15 @@ async def create_anthropic_message(
     if engine is None:
         return Response(status_code=499)
     release_on_exit = True
-    prepared = _prepare_anthropic_endpoint_invocation(
-        engine,
-        openai_request,
-        effective_max_tokens,
-    )
 
     try:
+        # Preparation can reject media URLs after acquisition, so it must
+        # share the same lease cleanup as generation failures.
+        prepared = _prepare_anthropic_endpoint_invocation(
+            engine,
+            openai_request,
+            effective_max_tokens,
+        )
         if anthropic_request.stream:
             anthropic_terminal = (
                 f"event: message_stop\ndata: {json.dumps({'type': 'message_stop'})}\n\n"
