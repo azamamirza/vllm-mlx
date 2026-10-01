@@ -80,6 +80,8 @@ jobs:
             tests/test_memory_cache.py \
             tests/test_prefix_cache.py \
             tests/test_mllm_cache.py \
+            tests/test_mllm_assistant_images.py \
+            tests/test_mllm_message_ordering.py \
             tests/test_audio.py \
             tests/test_api_models.py \
             tests/test_api_utils.py \
@@ -206,6 +208,7 @@ jobs:
             tests/test_audio.py \
             tests/test_llm.py \
             tests/test_mllm.py \
+            tests/test_mllm_assistant_images.py \
             tests/test_server.py \
             tests/test_metrics.py \
             tests/test_paged_cache.py \
